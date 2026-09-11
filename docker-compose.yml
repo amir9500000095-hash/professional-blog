@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: blog_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+
+  redis:
+    image: redis:7-alpine
+    container_name: blog_redis
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: .
+    container_name: blog_backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+      - redis
+    environment:
+      MONGODB_URI: mongodb://admin:admin@mongodb:27017/professional-blog?authSource=admin
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: production
+    volumes:
+      - ./uploads:/app/uploads
+
+volumes:
+  mongodb_data:
